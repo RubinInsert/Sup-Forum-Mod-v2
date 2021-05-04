@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+ 
+  "name": "SUP Pinned Topics (Unofficial)",
+  "version": "1.2.0",
+  "description": "Feature allowing the pinning of topics to the home page.",
+"icons": { "128": "icon_128x128.png" },
+  "content_scripts": [{
+    "js": ["jquery.js", "content.js"],
+    "matches": ["https://forum.superiorservers.co/*"]
+  }]
+ 
+}
