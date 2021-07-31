@@ -259,73 +259,312 @@ container.addEventListener("dragover", function (event) { // If a player is drag
  } */
 
  // Bans Page Filters and OverHaul
-if (window.location.href.includes("/bans")) { 
+if (window.location.href.includes("superiorservers.co/bans")) { 
+	// Function / Callbacks
+	function LoadBans(Server, Start) {
+		var DRP_COUNT, CWRP_COUNT, OTHER_COUNT;
+		var Ban_Time = "";
+		DRP_COUNT = [];
+		CWRP_COUNT = [];
+		OTHER_COUNT = [];
+		$.ajax({
+			url: 'https://superiorservers.co/api/bans?draw=1&length=100&start=' + Start,
+			method: 'get',
+			async: false, // WAITS FOR RESULTS (DEPRICATED, FIND ALTERNATIVE)
+			success: (data) => {
+				data.data.forEach(function (item, banNum) {
+					var ServerType = data.data[banNum][2];
+					switch (ServerType) {
 
-		$("#bans_wrapper > div:nth-child(1) > div:nth-child(1)").append(`
+						case "CWRP":
+							CWRP_COUNT.push(data.data[banNum]);
+							break
+						case "DarkRP & Zombies":
+							DRP_COUNT.push(data.data[banNum]);
+							break
+						default:
+							OTHER_COUNT.push(data.data[banNum]);
 
-					<style>
-				div.Filters_Insert {
-										background: rgba(5,5,5, 0.4);
-					           		 border-radius: 15px;
-					            		text-align: center;
-					            		width: 300px;
-		        
-
-								}
-</style>
-<div class="Filters_Insert" style="position:sticky;">
-    <input type="checkbox" style="position:sticky; filter: inverted(100%);" class="DarkRP_Bans Bans_Check" `+ localStorage.getItem("DarkRP_Checkbox_Val") + `>
-    		<span>&nbsp;&nbsp;DARKRP&nbsp;&nbsp;</span>
-    </input>
-    <input type="checkbox" style="position:sticky; filter: inverted(100%);" class="CWRP_Bans Bans_Check" `+ localStorage.getItem("CWRP_Checkbox_Val") + `>
-    		<span>&nbsp;&nbsp;CWRP&nbsp;&nbsp;</span>
-    </input>
-	<input type="checkbox" style="position:sticky; filter: inverted(100%);" class="MILRP_Bans Bans_Check" ` + localStorage.getItem("MILRP_Checkbox_Val") + `>
-			<span">&nbsp;&nbsp;MILRP&nbsp;&nbsp;</span>
-	</input>
-</div>
-
-
-
-
-
-
-
-
-
-
-			`);
-
-
-	function banTableUpdate() {
-
-		if ($('.DarkRP_Bans:checked').val() == undefined) {
-			$('tr[role=row]:contains("DarkRP")').hide();
-			localStorage.setItem("DarkRP_Checkbox_Val", " ");
-		} else {
-			$('tr[role=row]:contains("DarkRP")').show();
-			localStorage.setItem("DarkRP_Checkbox_Val", "checked");
+					}
+				});
+			}
+		});
+		switch (Server) {
+			case "CWRP":
+				return CWRP_COUNT;
+			case "DRP":
+				return DRP_COUNT;
+			case "OTHER":
+				return OTHER_COUNT;
+			default:
+				return -1;
 		}
-		if ($('.CWRP_Bans:checked').val() == undefined) {
-			$('tr[role=row]:contains("CWRP")').hide();
-			localStorage.setItem("CWRP_Checkbox_Val", " ");
-		} else {
-			$('tr[role=row]:contains("CWRP")').show();
-			localStorage.setItem("CWRP_Checkbox_Val", "checked");
-		}
-		if ($('.MILRP_Bans:checked').val() == undefined) {
-			$('tr[role=row]:contains("MilRP")').hide();
-			localStorage.setItem("MILRP_Checkbox_Val", " ");
-		} else {
-			$('tr[role=row]:contains("MilRP")').show();
-			localStorage.setItem("MILRP_Checkbox_Val", "checked");
-		}
-
-
+		return 0;
 	}
-$('.Bans_Check').change(banTableUpdate()); // Imediately update a checkbox once clicked
 
-tableUpdater = setInterval(banTableUpdate, 500); // Timer to update the bans table incase User changes the table in any way
+	function DrawBansTable(Server, Start) {
+		var banClass;
+		var BANS = [];
+		var Current_Bans = [];
+		while (BANS.length < 100) {
+			Current_Bans = LoadBans(Server, Start);
+			for (i of Current_Bans) {
+				BANS.push(i);
+			}
+
+			Start += 100;
+		}
+		$('.odd, .even').remove();
+		for (i in BANS) {
+			banClass = "";
+			if (BANS[i][9] != "") {
+				banClass = "supSuccess";
+			}
+			if (BANS[i][10] == true) {
+				banClass = "supDanger";
+			}
+			if (BANS[i][5] <= 0) {
+				BANS[i][5] = "Permanent";
+			}
+			Ban_Time = BANS[i][7];
+			if (Ban_Time <= 0) {
+				Ban_Time = "Permanent"
+			} else {
+				Ban_Time = util.TimeToString(Ban_Time);
+			}
+
+			$('tbody').append(`
+       <tr role="row" class="odd ` + banClass + `">
+        <td>` + BANS[i][0] + `</td> 
+        <td>` + util.FormatDate(BANS[i][1]) + `</td>
+        <td>` + BANS[i][2] + `</td>
+        <td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][4] + `" style="display: inline-block;"></div>` + BANS[i][3] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:63323314</div></a></div></td><td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][6] + `" style="display: inline-block;"></div>` + BANS[i][5] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:517220534</div></a></div></td>
+        <td>` + Ban_Time + `</td>
+        <td>` + BANS[i][8] + `</td>
+        <td>` + BANS[i][9] + `</td>
+       </tr>
+    `);
+			
+		}
+		console.log("# Insert's Modification #Table Drawn > Server: " + Server + " > Finished At (Entry): " + Start);
+	}
+	function Staff_LoadBans(STAFF_PROMPT, Start) {
+		var DRP_COUNT, CWRP_COUNT, OTHER_COUNT;
+		var Ban_Time = "";
+		var STAFF_BAN = [];
+		$.ajax({
+			url: 'https://superiorservers.co/api/bans?draw=1&length=100&start=' + Start,
+			method: 'get',
+			async: false, // WAITS FOR RESULTS (DEPRICATED, FIND ALTERNATIVE)
+			success: (data) => {
+				data.data.forEach(function (item, banNum) {
+					var Staff_STEAM = data.data[banNum][6];
+					if (Staff_STEAM == STAFF_PROMPT) {
+						STAFF_BAN.push(data.data[banNum]);
+					}
+				});
+			}
+		});
+		return STAFF_BAN;
+	}
+
+	function StaffSearch(STAFF_PROMPT, Entries) {
+		if (!steam.IsSteamID64(STAFF_PROMPT)) { return -1; }
+		var banClass;
+		var BANS = [];
+		var Start = 0;
+		var Current_Bans = [];
+		var Missing_Bans = 0;
+		while (Start < Entries) {
+			Current_Bans = Staff_LoadBans(STAFF_PROMPT, Start);
+			for (i of Current_Bans) {
+				BANS.push(i);
+			}
+
+			Start += 100;
+		}
+		$('.odd, .even').remove();
+		for (i in BANS) {
+			banClass = "";
+			if (BANS[i][9] != "") {
+				banClass = "supSuccess";
+			}
+			if (BANS[i][10] == true) {
+				banClass = "supDanger";
+			}
+			if (BANS[i][5] <= 0) {
+				BANS[i][5] = "Permanent";
+			}
+			Ban_Time = BANS[i][7];
+			if (Ban_Time <= 0) {
+				Ban_Time = "Permanent"
+			} else {
+				Ban_Time = util.TimeToString(Ban_Time);
+			}
+			$('tbody').append(`
+       <tr role="row" class="odd ` + banClass + `">
+        <td>` + BANS[i][0] + `</td> 
+        <td>` + util.FormatDate(BANS[i][1]) + `</td>
+        <td>` + BANS[i][2] + `</td>
+        <td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][4] + `" style="display: inline-block;"></div>` + BANS[i][3] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:63323314</div></a></div></td><td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][6] + `" style="display: inline-block;"></div>` + BANS[i][5] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:517220534</div></a></div></td>
+        <td>` + Ban_Time + `</td>
+        <td>` + BANS[i][8] + `</td>
+        <td>` + BANS[i][9] + `</td>
+       </tr>
+    `);
+
+		}
+		console.log("# Insert's Modification #Table Drawn > STEAM: " + STAFF_PROMPT + " > Finished At (Entry): " + Start);
+	}
+
+	// CSS Styling
+	/* For Potential Additions to the filters ( Filters_Insert ):
+	 
+	 	justify-content: space-around;
+		display:flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		*/
+	$('head').append(`
+		<style>
+		.Filters_Panel_Insert {
+		background: rgba(0,0,0,0.3);
+		position: sticky; 
+		top:25%; 
+		left:0px; 
+		max-width:13%; 
+		overflow: hidden;
+		}
+		.Server_Filters_Insert {
+		background: rgba(0, 100, 255, 0.15);
+		}
+		.Filters_Insert {
+		padding: 3%;
+		}
+		.Filter_Insert {
+		padding: 2%;
+		border-radius: 15px;
+		margin-top: 3%;
+		}
+		.Filters_Title {
+		font-size: 15px!important;
+		font-weight: bolder;
+		}	
+		.Bans_Check {
+		position:sticky;
+		filter: inverted(100%);
+		background: rgba(0,0,0,0);
+		}
+		.Staff_Search {
+		background: rgba(0, 0, 0, 1);
+		width: 60%;
+		position:sticky;
+		border-radius: 15px;
+		border: none;
+		white-space: nowrap;
+		}
+		.Loading {
+		background: #323232;
+		width: 150px;
+		padding: 15px;
+		color: #fff;
+		position: fixed;
+		bottom: -20%;
+		border-radius: 3px;
+		font-size: 16px;
+		text-align: center;
+		z-index: 15000;
+		left: 50%;
+		animation-duration: 2s;
+		animation-fill-mode: forwards;
+		}
+		@keyframes slidedown-Load {
+		0% {bottom: 10%;}
+		100% {bottom: -20%;}
+		}
+		@keyframes slideup-Load {
+		100% {bottom: 10%;}
+		}
+		</style>
+
+
+	`);
+	// Stop Overflow to up to 150% zoom.
+	$('.container').css("min-width", "50%");
+	$('.container').css("max-width", "75%");
+	// Filter Menu
+	$(".navbar").after(`
+
+<div class='Filters_Panel_Insert'>
+		<div class="panel-heading panel" style="background:rgba(0,0,0,0.8)">
+			<h3 class="panel-title Ban_Customs_Title"> Filters </h3>
+		</div>
+		<div class="Filters_Insert">
+			<div class="Server_Filters_Insert Filter_Insert">
+					<h4 class="Server_Filters_Title_Insert Filters_Title"> Server Type </h4>
+					<div>
+						<button class="DarkRP_Bans Bans_Check" style="position:sticky;">
+    							<span>&nbsp;&nbsp;DARKRP&nbsp;&nbsp;</span> </button>
+								<br>
+					</div>
+					<div>
+						<button class="CWRP_Bans Bans_Check" style="position:sticky;">
+    							<span>&nbsp;&nbsp;CWRP&nbsp;&nbsp;</span> </button>
+								<br>
+					</div>
+					<div>
+						<button class="MILRP_Bans Bans_Check" style="position:sticky;">
+								<span>&nbsp;&nbsp;MILRP&nbsp;&nbsp;</span"> </button>
+								<br>
+					</div>
+				</div>
+		<div class="Server_Filters_Insert Filter_Insert">
+					<h4 class="Server_Filters_Title_Insert Filters_Title"> Staff Search </h4>
+					<div>
+						<input style="position:sticky;" class="Staff_Search"placeholder="Staff Steam ID">
+    							<button class="Bans_Check Staff_Bans"> Search </button  
+								<br>
+					</div>
+				</div>
+			</div>
+	</div>
+			`);
+	$('body').append(`<div class="Loading"> <i class="Loading_Symb"> </i>Loading...</div>`); // For when someone uses a filter, it will show up.
+	var totalBans = $.getJSON("https://superiorservers.co/api/bans?draw=1&length=10&start=0"); // Gets the total amount of bans by calling the smallest JSON req. Possible.
+	$('.DarkRP_Bans').on("click", function () {
+		$('.Loading').css("animation-name", "slideup-Load");
+		setTimeout(() => {
+			DrawBansTable("DRP", 0);
+			$('.Loading').css("animation-name", "slidedown-Load");
+		}, 1500);
+		
+	});
+	$('.CWRP_Bans').on("click", function () {
+		$('.Loading').css("animation-name", "slideup-Load");
+		setTimeout(function() {
+			DrawBansTable("CWRP", 0);
+			$('.Loading').css("animation-name", "slidedown-Load");
+		}, 1500);
+		
+	});
+	$('.MILRP_Bans').on("click", function () {
+		$('.Loading').css("animation-name", "slideup-Load");
+		setTimeout(() => {
+			DrawBansTable("OTHER", 0);
+			$('.Loading').css("animation-name", "slidedown-Load");
+		}, 1500);
+		
+	});
+	$('.Staff_Bans').on("click", function () {
+		$('.Loading').css("animation-name", "slideup-Load");
+		setTimeout(() => {
+			StaffSearch(steam.SteamIDTo64($('.Staff_Search').val()), (parseInt(totalBans.responseJSON.recordsTotal) - 100));
+			$('.Loading').css("animation-name", "slidedown-Load");
+		}, 1500);
+		
+	});
+
+// tableUpdater = setInterval(banTableUpdate, 500); // Timer to update the bans table incase User changes the table in any way
 
 }
 if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Add a button to pin the topic

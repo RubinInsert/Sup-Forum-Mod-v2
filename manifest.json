@@ -2,11 +2,11 @@
   "manifest_version": 2,
  
   "name": "[Unofficial] SUP Forums MOD",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "Feature allowing the pinning of topics to the home page. Additional Features: Filter Bans by Servers, Minimized Server List",
 "icons": { "128": "icon_128x128.png" },
   "content_scripts": [{
-    "js": ["jquery.js", "html5sortable.min.js", "content.js"],
+    "js": ["jquery.js", "html5sortable.min.js", "vue.js", "util.min.js", "steam.js", "content.js"],
     "matches": ["https://forum.superiorservers.co/*", "https://superiorservers.co/*"]
   }]
  
