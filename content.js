@@ -45,35 +45,35 @@ console.log("Insert Name's Forum Modification")
         	// Functions
 	        	function UpdateServerCount() {
 	        		// Update DarkRP Player Count (Out of 384 Players)
-	        			$(".DRP_PC").html('<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp' + $("#DarkRP\\ \\&\\ Zombies > div.cForumGrid__hero > div > div > ul > li:nth-child(1)").text() + "/384");
-							// Tool-Tip, So you can see the player count of individual servers	        		
-								var DT_Pcount = $("#DarkRP\\ \\&\\ Zombies > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(1) > a").text();
-								var C18_Pcount = $("#DarkRP\\ \\&\\ Zombies > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(2) > a").text();
-								var ZRP_Pcount = $("#DarkRP\\ \\&\\ Zombies > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(3) > a").text();
-								
-								$(".DRP_PC").attr("data-ipstooltip", ""); // Honestly dunno why this is needed but seems like the tool tip doesnt work without it
-								$(".DRP_PC").attr("_title", "DT: " + DT_Pcount + " | C18: " + C18_Pcount + " | ZRP: " + ZRP_Pcount);
-								// data-ipstooltip="" _title="Connect to Danktown" ----- !!! IMPORTANT FOR THE TWO LINES ABOVE, Adds a SUP themed tool tip.
-
-
-	        		// Update CWRP Player Count (Out of 384 Players)
-	        			$(".CWRP_PC").html('<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp' + $("#CWRP > div.cForumGrid__hero > div > div > ul > li:nth-child(1)").text() + "/384");
-	   						// Tool-Tip, So you can see the player count of individual servers	      		
-								var CWRP_Pcount = $("#CWRP > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(1) > a").text();
-								var Training_Pcount = $("#CWRP > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(2) > a").text();
-								var Events_Pcount = $("#CWRP > div.cForumGrid__description.ipsFlex.ipsFlex\\:11 > div:nth-child(2) > div:nth-child(3) > a").text();
-								
-								$(".CWRP_PC").attr("data-ipstooltip", "");
-								$(".CWRP_PC").attr("_title", "CWRP: " + CWRP_Pcount + " | Training: " + Training_Pcount + " | Events: " + Events_Pcount);
-
-	        		// Update MilRP Player Count (Out of 128 Players), Tool Tip not necessary as it is a stand alone server.
-	        		$(".MilRP_PC").html('<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp' + $("#MilRP > div.cForumGrid__hero > div > div > ul > li:nth-child(1)").text() + "/128");
-	        		
+					fetch("https://superiorservers.co/api/servers").then(servers => servers.json())
+					.then((servers) => {
+						servers = servers.response.Servers; // Json contains all server info.
+						var Discord_Pcount = `${servers[0].Players}/${servers[0].MaxPlayers}`
+						var TS_Pcount = `${servers[1].Players}/${servers[1].MaxPlayers}`
+						var DT_Pcount = `${servers[2].Players}/${servers[2].MaxPlayers}`;
+						var C18_Pcount = `${servers[3].Players}/${servers[3].MaxPlayers}`;
+						var ZRP_Pcount = `${servers[4].Players}/${servers[4].MaxPlayers}`;
+						var CWRP_Pcount = `${servers[5].Players}/${servers[5].MaxPlayers}`;
+						var Training_Pcount = `${servers[6].Players}/${servers[6].MaxPlayers}`;
+						var Events_Pcount = `${servers[7].Players}/${servers[7].MaxPlayers}`;
+						// DARK RP
+							$(".DRP_PC").html(`<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp${servers[2].Players + servers[3].Players + servers[4].Players}/384`);
+							console.log(servers);
+							$(".DRP_PC").attr("data-ipstooltip", ""); // Honestly dunno why this is needed but seems like the tool tip doesnt work without it
+							$(".DRP_PC").attr("_title", "DT: " + DT_Pcount + " | C18: " + C18_Pcount + " | ZRP: " + ZRP_Pcount);
+							// data-ipstooltip="" _title="Connect to Danktown" ----- !!! IMPORTANT FOR THE TWO LINES ABOVE, Adds a SUP themed tool tip.
+						// CLONEWARS RP
+							$(".CWRP_PC").html(`<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp${servers[5].Players + servers[6].Players + servers[7].Players}/384`);
+							$(".CWRP_PC").attr("data-ipstooltip", "");
+							$(".CWRP_PC").attr("_title", "CWRP: " + CWRP_Pcount + " | Training: " + Training_Pcount + " | Events: " + Events_Pcount);
+						// MILRP
+							$(".MilRP_PC").html(`<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp${servers[8].Players}/128`);
+						// Discord & TS3
+							$(".TS_PC").html(`<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp${servers[0].Players + servers[1].Players}/${servers[0].MaxPlayers}`);
+							$(".TS_PC").attr("data-ipstooltip", "");
+							$(".TS_PC").attr("_title", "TS3: " + TS_Pcount + " | Discord: " + Discord_Pcount);	
+					})
 	        		// Update Teamspeak3 Player Count (Under Community Heading)
-	        		var TS_Pcount = $("#TS3 > div.cForumGrid__hero > div > div > ul > li:nth-child(1)").text();
-	        		$(".TS_PC").html('<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">&nbsp' + $("#TS3 > div.cForumGrid__hero > div > div > ul > li:nth-child(1)").text() + "/512");
-	        		$(".TS_PC").attr("data-ipstooltip", "");
-					$(".TS_PC").attr("_title", "TS3: " + TS_Pcount + "/512");
 
 
 
@@ -570,7 +570,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Add a button to pin the topic
 
 
- 	// Initialize Variables and Set up a variable which contains the format for pinning a post
+ 	// Initialize Variables and Set up a variable which contains the format for pinning a post	
  	$('body').prepend(`
  		<script>
 		var Post_Title = $('.ipsType_pageTitle').text()
