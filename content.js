@@ -20,23 +20,6 @@ console.log("Insert Name's Forum Modification")
 			}
 			// Insert As  A <script> tag for global use cause fuck using any other method.
 		$('body').prepend(`
-			<style>
-			h3.PlayerCount {
-				background: #222;
-				border-radius:25px;
-				padding: 7px;
-				float: right;
-				}
-				.dragging_PH {
-				border-color: gray;
-				border-style: dashed;
-				border-width: 2px;
-				}
-			@keyframes highlightComment {
-				50% {background-color: rgba(255, 255, 0, 0.3)}
-				100% {}
-			}
-			</style>
 			<script>
 					function FillEmptyPinSlot(topic) {
 
@@ -104,6 +87,19 @@ console.log("Insert Name's Forum Modification")
 
         	// Dark RP Player Count Bubble & Styling for all custom elementsCSS)
 	 			$("#ipsLayout_mainArea > section > ol.ipsList_reset.cForumList.splitview > li:nth-child(4) > div").prepend(`
+				<style>
+				h3.PlayerCount {
+				background: #222;
+				border-radius:25px;
+				padding: 7px;
+				float: right;
+				}
+				.dragging_PH {
+				border-color: gray;
+				border-style: dashed;
+				border-width: 2px;
+				}
+				</style>
 
 
 
@@ -218,7 +214,49 @@ console.log("Insert Name's Forum Modification")
 			}
  }
 
+// Dragging Functionality to Re-Order the Pinned List
+/*
+const draggables = document.querySelectorAll('.draggable_');
+const container = document.querySelector('#ipsTabs_nbRecTPTabsTabBar_yydduq41c_nbRecTPTabsTabPinned_yydduq41c_Hide_panel');
+draggables.forEach(function(draggable) { // Detect when User begins dragging a post
+	console.log("#Insert Name's Forum Modification #  Innitializing Draggable Function");
+	draggable.addEventListener("dragstart", function (event) {
+		console.log("#Insert Name's Forum Modification #  User Begun Dragging")
+		draggable.classList.add("dragging");
 
+
+	})
+	draggable.addEventListener("dragend", function (event) { // Detect when a User stops dragging a post
+		console.log("#Insert Name's Forum Modification #  User Stopped Dragging")
+		draggable.classList.remove("dragging");
+
+
+	})
+})
+container.addEventListener("dragover", function (event) { // If a player is dragging over the Recents Page
+	event.preventDefault();
+
+
+})
+
+*/
+ //Function to Pin a Post / Save a Post to Local Storage (Checkbox to Pin)
+
+/* 
+
+ if(window.location.href.includes("/forum/")) { // If you are on a forum page (Not inside a post)
+ 	$('.ipsDataItem').append(`<input type="checkbox" class="Pin_A_Post" style="filter: invert(100%); opacity: 1;"></input>`);
+
+	$('.Pin_A_Post').change(function() {
+		if($(this).is(':checked')) {
+	  var topic = $(this).siblings('div.ipsDataItem_main').html();
+	  	FillEmptyPinSlot(topic);
+
+		}
+	});
+
+
+ } */
 
  // Bans Page Filters and OverHaul
 if (window.location.href.includes("superiorservers.co/bans")) { 
@@ -530,21 +568,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 
 }
 if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Add a button to pin the topic
-	if(location.href.includes("#comment-")) {
-		var allPosts = document.getElementsByClassName("cPost");
-		for(var i = 0; i < allPosts.length; i++) {
-			var postID = allPosts[i].id.split("_")[1];
-			var urlID = location.href.split("#")[1].split("-")[1];
-			console.log(postID + "-" + urlID);
-			if (postID != urlID) continue;
-			allPosts[i].style.cssText = `
-			animation-name: highlightComment;
-			animation-duration: 2s 
-			`;
-			break;
-		}
-	}
-	
+
 
  	// Initialize Variables and Set up a variable which contains the format for pinning a post	
  	$('body').prepend(`
