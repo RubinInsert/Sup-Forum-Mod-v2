@@ -261,161 +261,140 @@ container.addEventListener("dragover", function (event) { // If a player is drag
  // Bans Page Filters and OverHaul
 if (window.location.href.includes("superiorservers.co/bans")) { 
 	// Function / Callbacks
-	function LoadBans(Server, Start) {
-		var DRP_COUNT, CWRP_COUNT, OTHER_COUNT;
-		var Ban_Time = "";
-		DRP_COUNT = [];
-		CWRP_COUNT = [];
-		OTHER_COUNT = [];
-		$.ajax({
-			url: 'https://superiorservers.co/api/bans?draw=1&length=100&start=' + Start,
-			method: 'get',
-			async: false, // WAITS FOR RESULTS (DEPRICATED, FIND ALTERNATIVE)
-			success: (data) => {
-				data.data.forEach(function (item, banNum) {
-					var ServerType = data.data[banNum][2];
-					switch (ServerType) {
-
-						case "CWRP":
-							CWRP_COUNT.push(data.data[banNum]);
-							break
-						case "DarkRP & Zombies":
-							DRP_COUNT.push(data.data[banNum]);
-							break
-						default:
-							OTHER_COUNT.push(data.data[banNum]);
-
+	function gamemodeSearch(gName) {
+		fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=0").then(initialBanSearch => initialBanSearch.json())
+		.then((initialBanSearch) => {
+			var allBansRaw = [];
+			var processedBans = [];
+			for (var i = 0; i < initialBanSearch.recordsTotal/100; i++) {
+			allBansRaw.push(fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=" + i * 100).then(data => data.json()));
+			}
+			Promise.all(allBansRaw).then((allBansJSON) => {
+				for(var i = 0; i < allBansJSON.length; i++) {
+					tempBans = allBansJSON[i].data
+					for(var z = 0; z < tempBans.length; z++) {
+						if(tempBans[z][2] == gName) {
+						processedBans.push(tempBans[z]);
+						}
 					}
-				});
+				}
+			var banTable = document.getElementsByTagName("tbody")[0];
+			banTable.innerHTML = "";
+			for(var i = 0; i < 100; i++) {
+            if (100 > processedBans.length) break;
+			var banElem = document.createElement("tr");
+			var banTime = "";
+			if (processedBans[i][9] != "") {
+				banElem.classList.add("supSuccess");
 			}
-		});
-		switch (Server) {
-			case "CWRP":
-				return CWRP_COUNT;
-			case "DRP":
-				return DRP_COUNT;
-			case "OTHER":
-				return OTHER_COUNT;
-			default:
-				return -1;
-		}
-		return 0;
+			if (processedBans[i][10] == true) {
+				banElem.classList.add("supDanger");
+			}
+			banTime = util.TimeToString(processedBans[i][7]);
+			if (processedBans[i][7] <= 0) banTime = "Permanent";
+	
+	
+			banElem.innerHTML = 
+			`<td>${processedBans[i][0]}</td>
+			<td>${util.FormatDate(processedBans[i][1])}</td>
+			<td>${processedBans[i][2]}</td>
+			<td>
+			   <a href="/profile/${processedBans[i][4]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][4]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][4]}" src="/api/avatar/${processedBans[i][4]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][3]}
+				  </a>
+			   </div>
+			</td>
+			<td>
+			   <a href="/profile/${processedBans[i][6]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][6]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][6]}" src="/api/avatar/${processedBans[i][6]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][5]}
+				  </a>
+			   </div>
+			</td>
+			<td>${banTime}</td>
+			<td>${util.Linkify(processedBans[i][8])}</td>
+			<td>${processedBans[i][9]}</td>`;
+			banTable.appendChild(banElem);
+			}
+			});
+		})
 	}
-
-	function DrawBansTable(Server, Start) {
-		var banClass;
-		var BANS = [];
-		var Current_Bans = [];
-		while (BANS.length < 100) {
-			Current_Bans = LoadBans(Server, Start);
-			for (i of Current_Bans) {
-				BANS.push(i);
+	function staffSearch(staffSteam) {
+		fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=0").then(initialBanSearch => initialBanSearch.json())
+		.then((initialBanSearch) => {
+			var allBansRaw = [];
+			var processedBans = [];
+			for (var i = 0; i < initialBanSearch.recordsTotal/100; i++) {
+			allBansRaw.push(fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=" + i * 100).then(data => data.json()));
 			}
-
-			Start += 100;
-		}
-		$('.odd, .even').remove();
-		for (i in BANS) {
-			banClass = "";
-			if (BANS[i][9] != "") {
-				banClass = "supSuccess";
-			}
-			if (BANS[i][10] == true) {
-				banClass = "supDanger";
-			}
-			if (BANS[i][5] <= 0) {
-				BANS[i][5] = "Permanent";
-			}
-			Ban_Time = BANS[i][7];
-			if (Ban_Time <= 0) {
-				Ban_Time = "Permanent"
-			} else {
-				Ban_Time = util.TimeToString(Ban_Time);
-			}
-
-			$('tbody').append(`
-       <tr role="row" class="odd ` + banClass + `">
-        <td>` + BANS[i][0] + `</td> 
-        <td>` + util.FormatDate(BANS[i][1]) + `</td>
-        <td>` + BANS[i][2] + `</td>
-        <td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][4] + `" style="display: inline-block;"></div>` + BANS[i][3] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:63323314</div></a></div></td><td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][6] + `" style="display: inline-block;"></div>` + BANS[i][5] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:517220534</div></a></div></td>
-        <td>` + Ban_Time + `</td>
-        <td>` + BANS[i][8] + `</td>
-        <td>` + BANS[i][9] + `</td>
-       </tr>
-    `);
-			
-		}
-		console.log("# Insert's Modification #Table Drawn > Server: " + Server + " > Finished At (Entry): " + Start);
-	}
-	function Staff_LoadBans(STAFF_PROMPT, Start) {
-		var DRP_COUNT, CWRP_COUNT, OTHER_COUNT;
-		var Ban_Time = "";
-		var STAFF_BAN = [];
-		$.ajax({
-			url: 'https://superiorservers.co/api/bans?draw=1&length=100&start=' + Start,
-			method: 'get',
-			async: false, // WAITS FOR RESULTS (DEPRICATED, FIND ALTERNATIVE)
-			success: (data) => {
-				data.data.forEach(function (item, banNum) {
-					var Staff_STEAM = data.data[banNum][6];
-					if (Staff_STEAM == STAFF_PROMPT) {
-						STAFF_BAN.push(data.data[banNum]);
+			Promise.all(allBansRaw).then((allBansJSON) => {
+				for(var i = 0; i < allBansJSON.length; i++) {
+					tempBans = allBansJSON[i].data
+					for(var z = 0; z < tempBans.length; z++) {
+						if(tempBans[z][6] == staffSteam) {
+						processedBans.push(tempBans[z]);
+						}
 					}
-				});
+				}
+			var banTable = document.getElementsByTagName("tbody")[0];
+			banTable.innerHTML = "";
+			for(var i = 0; i < processedBans.length; i++) {
+			var banElem = document.createElement("tr");
+			var banTime = "";
+			if (processedBans[i][9] != "") {
+				banElem.classList.add("supSuccess");
 			}
-		});
-		return STAFF_BAN;
+			if (processedBans[i][10] == true) {
+				banElem.classList.add("supDanger");
+			}
+			banTime = util.TimeToString(processedBans[i][7]);
+			if (processedBans[i][7] <= 0) banTime = "Permanent";
+	
+	
+			banElem.innerHTML = 
+			`<td>${processedBans[i][0]}</td>
+			<td>${util.FormatDate(processedBans[i][1])}</td>
+			<td>${processedBans[i][2]}</td>
+			<td>
+			   <a href="/profile/${processedBans[i][4]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][4]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][4]}" src="/api/avatar/${processedBans[i][4]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][3]}
+				  </a>
+			   </div>
+			</td>
+			<td>
+			   <a href="/profile/${processedBans[i][6]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][6]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][6]}" src="/api/avatar/${processedBans[i][6]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][5]}
+				  </a>
+			   </div>
+			</td>
+			<td>${banTime}</td>
+			<td>${util.Linkify(processedBans[i][8])}</td>
+			<td>${processedBans[i][9]}</td>`;
+			banTable.appendChild(banElem);
+			}
+			});
+		})
 	}
-
-	function StaffSearch(STAFF_PROMPT, Entries) {
-		if (!steam.IsSteamID64(STAFF_PROMPT)) { return -1; }
-		var banClass;
-		var BANS = [];
-		var Start = 0;
-		var Current_Bans = [];
-		var Missing_Bans = 0;
-		while (Start < Entries) {
-			Current_Bans = Staff_LoadBans(STAFF_PROMPT, Start);
-			for (i of Current_Bans) {
-				BANS.push(i);
-			}
-
-			Start += 100;
-		}
-		$('.odd, .even').remove();
-		for (i in BANS) {
-			banClass = "";
-			if (BANS[i][9] != "") {
-				banClass = "supSuccess";
-			}
-			if (BANS[i][10] == true) {
-				banClass = "supDanger";
-			}
-			if (BANS[i][5] <= 0) {
-				BANS[i][5] = "Permanent";
-			}
-			Ban_Time = BANS[i][7];
-			if (Ban_Time <= 0) {
-				Ban_Time = "Permanent"
-			} else {
-				Ban_Time = util.TimeToString(Ban_Time);
-			}
-			$('tbody').append(`
-       <tr role="row" class="odd ` + banClass + `">
-        <td>` + BANS[i][0] + `</td> 
-        <td>` + util.FormatDate(BANS[i][1]) + `</td>
-        <td>` + BANS[i][2] + `</td>
-        <td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][4] + `" style="display: inline-block;"></div>` + BANS[i][3] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:63323314</div></a></div></td><td><a href="/profile/` + BANS[i][4] + `/" target="_blank"></a><div class="infobox"><a href="/profile/` + BANS[i][4] + `/" target="_blank"><div class="tableavatar"><img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/` + BANS[i][4] + `" src="/api/avatar/` + BANS[i][6] + `" style="display: inline-block;"></div>` + BANS[i][5] + `<div hidden=""> ` + BANS[i][4] + ` STEAM_0:1:517220534</div></a></div></td>
-        <td>` + Ban_Time + `</td>
-        <td>` + BANS[i][8] + `</td>
-        <td>` + BANS[i][9] + `</td>
-       </tr>
-    `);
-
-		}
-		console.log("# Insert's Modification #Table Drawn > STEAM: " + STAFF_PROMPT + " > Finished At (Entry): " + Start);
-	}
+	
 
 	// CSS Styling
 	/* For Potential Additions to the filters ( Filters_Insert ):
@@ -534,7 +513,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 	$('.DarkRP_Bans').on("click", function () {
 		$('.Loading').css("animation-name", "slideup-Load");
 		setTimeout(() => {
-			DrawBansTable("DRP", 0);
+			gamemodeSearch("DarkRP & Zombies");
 			$('.Loading').css("animation-name", "slidedown-Load");
 		}, 1500);
 		
@@ -542,7 +521,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 	$('.CWRP_Bans').on("click", function () {
 		$('.Loading').css("animation-name", "slideup-Load");
 		setTimeout(function() {
-			DrawBansTable("CWRP", 0);
+			gamemodeSearch("CWRP");
 			$('.Loading').css("animation-name", "slidedown-Load");
 		}, 1500);
 		
@@ -550,7 +529,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 	$('.MILRP_Bans').on("click", function () {
 		$('.Loading').css("animation-name", "slideup-Load");
 		setTimeout(() => {
-			DrawBansTable("OTHER", 0);
+			gamemodeSearch("MilRP");
 			$('.Loading').css("animation-name", "slidedown-Load");
 		}, 1500);
 		
@@ -558,7 +537,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 	$('.Staff_Bans').on("click", function () {
 		$('.Loading').css("animation-name", "slideup-Load");
 		setTimeout(() => {
-			StaffSearch(steam.SteamIDTo64($('.Staff_Search').val()), (parseInt(totalBans.responseJSON.recordsTotal) - 100));
+			staffSearch(steam.SteamIDTo64($('.Staff_Search').val().trim()));
 			$('.Loading').css("animation-name", "slidedown-Load");
 		}, 1500);
 		
