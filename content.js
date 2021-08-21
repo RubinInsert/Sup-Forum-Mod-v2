@@ -340,7 +340,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 				for(var i = 0; i < allBansJSON.length; i++) {
 					tempBans = allBansJSON[i].data
 					for(var z = 0; z < tempBans.length; z++) {
-						if(tempBans[z][6] == staffSteam) {
+						if(tempBans[z][6] == staffSteam || tempBans[z][8].includes(steam.SteamIDTo32(staffSteam))) { // Ban done by player, ban includes Steam ID in reason.
 						processedBans.push(tempBans[z]);
 						}
 					}
@@ -391,6 +391,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 			<td>${processedBans[i][9]}</td>`;
 			banTable.appendChild(banElem);
 			}
+			document.getElementsByClassName("dataTables_info")[0].innerHTML = `${processedBans.length} results filtered from ${initialBanSearch.recordsTotal} total bans`;
 			});
 		})
 	}
