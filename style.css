@@ -1,0 +1,96 @@
+    #filter-options {
+        display: inline-block;
+    }
+    .filter-radio {
+        display: none!important;
+    }
+    .filter-label {
+        padding: 5px;
+        margin: auto;
+        transition: 2s;
+    }
+    #server-group {
+        display: inline-flex;
+        justify-content: space-evenly;
+        background: rgba(0, 0, 0, 0.3);
+        margin-right: 30px;
+        text-align: center;
+        border-radius: 5px;
+    }
+    .filter-radio:checked+label {
+        background: rgba(210, 0, 0, 0.3);
+    }
+    h3.PlayerCount {
+        background: #222;
+        border-radius:25px;
+        padding: 7px;
+        float: right;
+    }
+    .dragging_PH {
+        border-color: gray;
+        border-style: dashed;
+        border-width: 2px;
+    }
+    .Filters_Panel_Insert {
+		background: rgba(0,0,0,0.3);
+		top:25%; 
+		left:0px; 
+		max-width:13%; 
+		overflow: hidden;
+		transition: 0.5s;
+		position: sticky;
+		}
+		.Server_Filters_Insert {
+		background: rgba(0, 100, 255, 0.15);
+		}
+		.Filters_Insert {
+		padding: 3%;
+		}
+		.Filter_Insert {
+		padding: 2%;
+		border-radius: 15px;
+		margin-top: 3%;
+		}
+		.Filters_Title {
+		font-size: 15px!important;
+		font-weight: bolder;
+		}	
+		.Bans_Check {
+		position:sticky;
+		filter: inverted(100%);
+		background: rgba(0,0,0,0);
+		}
+		.SearchBar {
+		background: rgba(0, 0, 0, 1);
+		width: 60%;
+		position:sticky;
+		border-radius: 15px;
+		border: none;
+		white-space: nowrap;
+		}
+		.Loading {
+		background: #323232;
+		width: 150px;
+		padding: 15px;
+		color: #fff;
+		position: fixed;
+		bottom: -20%;
+		border-radius: 3px;
+		font-size: 16px;
+		text-align: center;
+		z-index: 15000;
+		left: 50%;
+		animation-duration: 2s;
+		animation-fill-mode: forwards;
+		}
+		@keyframes slidedown-Load {
+		0% {bottom: 10%;}
+		100% {bottom: -20%;}
+		}
+		@keyframes slideup-Load {
+		100% {bottom: 10%;}
+		}
+        .container {
+            min-width: 50%!important;
+            max-width: 75%!important;
+        }

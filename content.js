@@ -5,8 +5,6 @@ console.log("Insert Name's Forum Modification")
 
 
 
-
-
 		function FillEmptyPinSlot(topic) {
 
 			  for (Pinned_Slot = 1; Pinned_Slot <= 10; Pinned_Slot++) {
@@ -87,22 +85,6 @@ console.log("Insert Name's Forum Modification")
 
         	// Dark RP Player Count Bubble & Styling for all custom elementsCSS)
 	 			$("#ipsLayout_mainArea > section > ol.ipsList_reset.cForumList.splitview > li:nth-child(4) > div").prepend(`
-				<style>
-				h3.PlayerCount {
-				background: #222;
-				border-radius:25px;
-				padding: 7px;
-				float: right;
-				}
-				.dragging_PH {
-				border-color: gray;
-				border-style: dashed;
-				border-width: 2px;
-				}
-				</style>
-
-
-
 				<div class="DRP_PCContainer" style="text-align: right; position:relative">
 					<h3 class="DRP_PC PlayerCount" style="bold:true;">
 						<img src="https://www.pinclipart.com/picdir/big/496-4968268_profile-icon-png-white-clipart.png" style="width: 15px;">
@@ -213,54 +195,81 @@ console.log("Insert Name's Forum Modification")
 					});
 			}
  }
-
-// Dragging Functionality to Re-Order the Pinned List
-/*
-const draggables = document.querySelectorAll('.draggable_');
-const container = document.querySelector('#ipsTabs_nbRecTPTabsTabBar_yydduq41c_nbRecTPTabsTabPinned_yydduq41c_Hide_panel');
-draggables.forEach(function(draggable) { // Detect when User begins dragging a post
-	console.log("#Insert Name's Forum Modification #  Innitializing Draggable Function");
-	draggable.addEventListener("dragstart", function (event) {
-		console.log("#Insert Name's Forum Modification #  User Begun Dragging")
-		draggable.classList.add("dragging");
-
-
-	})
-	draggable.addEventListener("dragend", function (event) { // Detect when a User stops dragging a post
-		console.log("#Insert Name's Forum Modification #  User Stopped Dragging")
-		draggable.classList.remove("dragging");
-
-
-	})
-})
-container.addEventListener("dragover", function (event) { // If a player is dragging over the Recents Page
-	event.preventDefault();
-
-
-})
-
-*/
- //Function to Pin a Post / Save a Post to Local Storage (Checkbox to Pin)
-
-/* 
-
- if(window.location.href.includes("/forum/")) { // If you are on a forum page (Not inside a post)
- 	$('.ipsDataItem').append(`<input type="checkbox" class="Pin_A_Post" style="filter: invert(100%); opacity: 1;"></input>`);
-
-	$('.Pin_A_Post').change(function() {
-		if($(this).is(':checked')) {
-	  var topic = $(this).siblings('div.ipsDataItem_main').html();
-	  	FillEmptyPinSlot(topic);
-
-		}
-	});
-
-
- } */
-
  // Bans Page Filters and OverHaul
 if (window.location.href.includes("superiorservers.co/bans")) { 
 	// Function / Callbacks
+	async function reasonSearch(reason) {
+		document.getElementById("all-radio").checked = true;
+		const initialBanSearch = await fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=0").then(data => data.json());
+		var allBansRaw = [];
+		var processedBans = [];
+		for (var i = 0; i < initialBanSearch.recordsTotal/100; i++) {
+			allBansRaw.push(fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=" + i * 100).then(data => data.json()));
+		}
+		Promise.all(allBansRaw).then((allBansJSON) => { 
+			for(var i = 0; i < allBansJSON.length; i++) {
+				tempBans = allBansJSON[i].data
+				for(var z = 0; z < tempBans.length; z++) {
+					if(reason.startsWith("!")) {
+						if(tempBans[z][8].toUpperCase() == reason.toUpperCase().trim().substring(1, reason.length)) {
+							processedBans.push(tempBans[z]);
+						}
+					} else {
+						if(tempBans[z][8].toUpperCase().includes(reason.toUpperCase())) {
+							processedBans.push(tempBans[z]);
+						}
+					}
+				}
+			}
+			var banTable = document.getElementsByTagName("tbody")[0];
+			banTable.innerHTML = "";
+			for(var i = 0; i < 100; i++) {
+			var banElem = document.createElement("tr");
+			var banTime = "";
+			if(processedBans.length == 0) return;
+			if (processedBans[i][9] != "") {
+				banElem.classList.add("supSuccess");
+			}
+			if (processedBans[i][10] == true) {
+				banElem.classList.add("supDanger");
+			}
+			banTime = util.TimeToString(processedBans[i][7]);
+			if (processedBans[i][7] <= 0) banTime = "Permanent";
+	
+	
+			banElem.innerHTML = 
+			`<td>${processedBans[i][0]}</td>
+			<td>${util.FormatDate(processedBans[i][1])}</td>
+			<td>${processedBans[i][2]}</td>
+			<td>
+			   <a href="/profile/${processedBans[i][4]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][4]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][4]}" src="/api/avatar/${processedBans[i][4]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][3]}
+				  </a>
+			   </div>
+			</td>
+			<td>
+			   <a href="/profile/${processedBans[i][6]}/" target="_blank"></a>
+			   <div class="infobox">
+				  <a href="/profile/${processedBans[i][6]}/" target="_blank">
+					 <div class="tableavatar">
+						<img class="avatar avatar-sm avatar-rounded" data-original="/api/avatar/${processedBans[i][6]}" src="/api/avatar/${processedBans[i][6]}" style="display: inline-block;">
+					 </div>
+					 ${processedBans[i][5]}
+				  </a>
+			   </div>
+			</td>
+			<td>${banTime}</td>
+			<td>${util.Linkify(processedBans[i][8])}</td>
+			<td>${processedBans[i][9]}</td>`;
+			banTable.appendChild(banElem);
+			}
+		});
+	}
 	function gamemodeSearch(gName) {
 		fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=0").then(initialBanSearch => initialBanSearch.json())
 		.then((initialBanSearch) => {
@@ -275,6 +284,9 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 					for(var z = 0; z < tempBans.length; z++) {
 						if(tempBans[z][2] == gName) {
 						processedBans.push(tempBans[z]);
+						}
+						if(gName == "") {
+							processedBans.push(tempBans[z]);
 						}
 					}
 				}
@@ -329,6 +341,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 		})
 	}
 	function staffSearch(staffSteam) {
+		document.getElementById("all-radio").checked = true;
 		fetch("https://superiorservers.co/api/bans?draw=1&length=100&start=0").then(initialBanSearch => initialBanSearch.json())
 		.then((initialBanSearch) => {
 			var allBansRaw = [];
@@ -340,7 +353,7 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 				for(var i = 0; i < allBansJSON.length; i++) {
 					tempBans = allBansJSON[i].data
 					for(var z = 0; z < tempBans.length; z++) {
-						if(tempBans[z][6] == staffSteam || tempBans[z][8].includes(steam.SteamIDTo32(staffSteam))) { // Ban done by player, ban includes Steam ID in reason.
+						if(tempBans[z][6] == steam.SteamIDTo64(staffSteam) || tempBans[z][8].includes(staffSteam)) { // Ban done by player, ban includes Steam ID in reason.
 						processedBans.push(tempBans[z]);
 						}
 					}
@@ -395,155 +408,62 @@ if (window.location.href.includes("superiorservers.co/bans")) {
 			});
 		})
 	}
-	
-
-	// CSS Styling
-	/* For Potential Additions to the filters ( Filters_Insert ):
-	 
-	 	justify-content: space-around;
-		display:flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		*/
-	$('head').append(`
-		<style>
-		.Filters_Panel_Insert {
-		background: rgba(0,0,0,0.3);
-		position: sticky; 
-		top:25%; 
-		left:0px; 
-		max-width:13%; 
-		overflow: hidden;
-		}
-		.Server_Filters_Insert {
-		background: rgba(0, 100, 255, 0.15);
-		}
-		.Filters_Insert {
-		padding: 3%;
-		}
-		.Filter_Insert {
-		padding: 2%;
-		border-radius: 15px;
-		margin-top: 3%;
-		}
-		.Filters_Title {
-		font-size: 15px!important;
-		font-weight: bolder;
-		}	
-		.Bans_Check {
-		position:sticky;
-		filter: inverted(100%);
-		background: rgba(0,0,0,0);
-		}
-		.Staff_Search {
-		background: rgba(0, 0, 0, 1);
-		width: 60%;
-		position:sticky;
-		border-radius: 15px;
-		border: none;
-		white-space: nowrap;
-		}
-		.Loading {
-		background: #323232;
-		width: 150px;
-		padding: 15px;
-		color: #fff;
-		position: fixed;
-		bottom: -20%;
-		border-radius: 3px;
-		font-size: 16px;
-		text-align: center;
-		z-index: 15000;
-		left: 50%;
-		animation-duration: 2s;
-		animation-fill-mode: forwards;
-		}
-		@keyframes slidedown-Load {
-		0% {bottom: 10%;}
-		100% {bottom: -20%;}
-		}
-		@keyframes slideup-Load {
-		100% {bottom: 10%;}
-		}
-		</style>
-
-
-	`);
-	// Stop Overflow to up to 150% zoom.
-	$('.container').css("min-width", "50%");
-	$('.container').css("max-width", "75%");
 	// Filter Menu
+	searchBarContainer = document.getElementById("bans_filter")
+filterContainer = document.createElement("div");
+filterContainer.id = "filter-options";
+filterContainer.innerHTML = `    <div id="server-group">
+		<div>
+			<input type="radio" id="all-radio" class="filter-radio" value="" name="server" checked><label class="filter-label" for="all-radio">All</label>
+		</div>
+        <div>
+            <input type="radio" id="drp-radio" class="filter-radio" value="DarkRP & Zombies" name="server"><label class="filter-label" for="drp-radio">DarkRP</label>
+        </div>
+        <div>
+            <input type="radio" id="cwrp-radio" class="filter-radio" value="CWRP" name="server"><label class="filter-label" for="cwrp-radio">CWRP</label>
+        </div>
+        <div>
+            <input type="radio" id="milrp-radio" class="filter-radio" value="MilRP" name="server"><label class="filter-label" for="milrp-radio">MilRP</label>
+        </div>
+    </div>`;
+	searchBarContainer.prepend(filterContainer)
 	$(".navbar").after(`
 
 <div class='Filters_Panel_Insert'>
 		<div class="panel-heading panel" style="background:rgba(0,0,0,0.8)">
-			<h3 class="panel-title Ban_Customs_Title"> Filters </h3>
+			<h3 class="panel-title Ban_Customs_Title"> Other Filters </h3>
 		</div>
 		<div class="Filters_Insert">
-			<div class="Server_Filters_Insert Filter_Insert">
-					<h4 class="Server_Filters_Title_Insert Filters_Title"> Server Type </h4>
-					<div>
-						<button class="DarkRP_Bans Bans_Check" style="position:sticky;">
-    							<span>&nbsp;&nbsp;DARKRP&nbsp;&nbsp;</span> </button>
-								<br>
-					</div>
-					<div>
-						<button class="CWRP_Bans Bans_Check" style="position:sticky;">
-    							<span>&nbsp;&nbsp;CWRP&nbsp;&nbsp;</span> </button>
-								<br>
-					</div>
-					<div>
-						<button class="MILRP_Bans Bans_Check" style="position:sticky;">
-								<span>&nbsp;&nbsp;MILRP&nbsp;&nbsp;</span"> </button>
-								<br>
-					</div>
-				</div>
 		<div class="Server_Filters_Insert Filter_Insert">
 					<h4 class="Server_Filters_Title_Insert Filters_Title"> Staff Search </h4>
 					<div>
-						<input style="position:sticky;" class="Staff_Search"placeholder="Staff Steam ID">
+						<input style="position:sticky;" class="SearchBar Staff_Search"placeholder="Staff Steam ID">
     							<button class="Bans_Check Staff_Bans"> Search </button  
 								<br>
 					</div>
 				</div>
+		<div class="Server_Filters_Insert Filter_Insert">
+					<h4 class="Server_Filters_Title_Insert Filters_Title"> Reason Search </h4>
+					<div>
+						<input style="position:sticky;" class="SearchBar Reason_Search"placeholder='e.g "RDM" '>
+								<button class="Bans_Check Reason_Bans"> Search </button  
+								<br>
+				</div>
+			</div>
 			</div>
 	</div>
 			`);
-	$('body').append(`<div class="Loading"> <i class="Loading_Symb"> </i>Loading...</div>`); // For when someone uses a filter, it will show up.
-	var totalBans = $.getJSON("https://superiorservers.co/api/bans?draw=1&length=10&start=0"); // Gets the total amount of bans by calling the smallest JSON req. Possible.
-	$('.DarkRP_Bans').on("click", function () {
-		$('.Loading').css("animation-name", "slideup-Load");
-		setTimeout(() => {
-			gamemodeSearch("DarkRP & Zombies");
-			$('.Loading').css("animation-name", "slidedown-Load");
-		}, 1500);
-		
-	});
-	$('.CWRP_Bans').on("click", function () {
-		$('.Loading').css("animation-name", "slideup-Load");
-		setTimeout(function() {
-			gamemodeSearch("CWRP");
-			$('.Loading').css("animation-name", "slidedown-Load");
-		}, 1500);
-		
-	});
-	$('.MILRP_Bans').on("click", function () {
-		$('.Loading').css("animation-name", "slideup-Load");
-		setTimeout(() => {
-			gamemodeSearch("MilRP");
-			$('.Loading').css("animation-name", "slidedown-Load");
-		}, 1500);
-		
+	var totalBans = fetch("https://superiorservers.co/api/bans?draw=1&length=10&start=0").then(data => data.json()); // Gets the total amount of bans by calling the smallest JSON req. Possible.
+	$('.filter-radio').on("change", function () {
+		gamemodeSearch(this.value);
 	});
 	$('.Staff_Bans').on("click", function () {
-		$('.Loading').css("animation-name", "slideup-Load");
-		setTimeout(() => {
-			staffSearch(steam.SteamIDTo64($('.Staff_Search').val().trim()));
-			$('.Loading').css("animation-name", "slidedown-Load");
-		}, 1500);
+			staffSearch($('.Staff_Search').val().trim());
 		
 	});
-
+	$('.Reason_Bans').on("click", function () {
+			reasonSearch($('.Reason_Search').val().trim());	
+	});
 // tableUpdater = setInterval(banTableUpdate, 500); // Timer to update the bans table incase User changes the table in any way
 
 }
@@ -551,32 +471,31 @@ if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Ad
 
 
  	// Initialize Variables and Set up a variable which contains the format for pinning a post	
- 	$('body').prepend(`
- 		<script>
-		var Post_Title = $('.ipsType_pageTitle').text()
-		var Post_URL = window.location.href;
-		var Post_Owner = $('.ipsType_reset').children('.ipsType_normal').html()
+	var v = document.createElement("script")
+	v.innerHTML = `
+	var Post_Title = $('.ipsType_pageTitle').text()
+	var Post_URL = window.location.href;
+	var Post_Owner = $('.ipsType_reset').children('.ipsType_normal').html()
 
-		var topic = \`
-		<div class="ipsDataItem_main ">
-									
-		<h4 class="ipsDataItem_title ipsContained_container">
-		<span class="ipsType_break ipsContained">
-		<a href="\` + Post_URL + \`" class="" title="\` + Post_Title + \`" data-ipshover="" data-ipshover-target="\` + Post_URL + \`?preview=1" data-ipshover-timeout="1.5" id="ips_uid_770_3">
-		<span>
-		\` + Post_Title + \`
-		</span>
-		</a>
-		</span>
-		</h4>
-		<div class="ipsDataItem_meta ipsType_reset ipsType_light ipsType_blendLinks Pinned_TimePosted">
-		<span>
-		\` + Post_Owner + \`
-		</div>
-		\`;
-		</script>
-		`);
-
+	var topic = \`
+	<div class="ipsDataItem_main ">
+								
+	<h4 class="ipsDataItem_title ipsContained_container">
+	<span class="ipsType_break ipsContained">
+	<a href="\` + Post_URL + \`" class="" title="\` + Post_Title + \`" data-ipshover="" data-ipshover-target="\` + Post_URL + \`?preview=1" data-ipshover-timeout="1.5" id="ips_uid_770_3">
+	<span>
+	\` + Post_Title + \`
+	</span>
+	</a>
+	</span>
+	</h4>
+	<div class="ipsDataItem_meta ipsType_reset ipsType_light ipsType_blendLinks Pinned_TimePosted">
+	<span>
+	\` + Post_Owner + \`
+	</div>
+	\`;
+	`;
+ 	document.getElementsByTagName('body').prepend('')
 
  				for (Pinned_Slot = 1; Pinned_Slot <= 10; Pinned_Slot++) {
 
@@ -597,16 +516,5 @@ if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Ad
 
 		  			}
 				}
-
-/*
-		$('#ipsLayout_mainArea > div.ipsPageHeader.ipsResponsive_pull.ipsBox.ipsPadding.sm\\:ipsPadding\\:half.ipsMargin_bottom > div.ipsPageHeader__meta.ipsFlex.ipsFlex-jc\\:between.ipsFlex-ai\\:center.ipsFlex-fw\\:wrap.ipsGap\\:3 > div.ipsFlex-flex\\:01.ipsResponsive_hidePhone > div').append(`
-			<button style="background: rgba(255, 255, 255, 0.8); border-radius: 5px; border: none; padding: 3px; height: 30px" onclick="window.FillEmptyPinSlot(window.topic); $(this).text('Post Pinned!'); $(this).attr('onclick',''); $(this).css('background', 'rgba(23, 126, 201, 1)'); $(this).css('color', 'white');">Pin Post</button>
-
-
-
-			`)
-
-*/
-
 }
 
