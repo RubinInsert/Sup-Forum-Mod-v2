@@ -495,7 +495,7 @@ if(window.location.href.includes("/topic/")) { // If you are INSIDE the post, Ad
 	</div>
 	\`;
 	`;
- 	document.getElementsByTagName('body').prepend('')
+ 	document.getElementsByTagName('body')[0].prepend(v)
 
  				for (Pinned_Slot = 1; Pinned_Slot <= 10; Pinned_Slot++) {
 
